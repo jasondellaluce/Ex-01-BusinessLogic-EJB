@@ -78,9 +78,11 @@
 			Product product = new Product();
 			product.setName( request.getParameter("name") );
 			product.setProductNumber(Integer.parseInt(request.getParameter("number")));
-
-			Producer producer = producerDAO.findProducerByName(request.getParameter("producer"));
-			product.setProducer(producer);
+            if (request.getParameter("producer") != null && request.getParameter("producer").length() > 0) {
+                int producerId = Integer.parseInt(request.getParameter("producer"));
+                Producer producer = producerDAO.findProducerById(producerId);
+                product.setProducer(producer);
+            }
 			int id = productDAO.insertProduct(product);
 			out.println("<!-- inserted product '" + product.getName() + "' with id = '" + id + "' -->");
 		}
@@ -109,15 +111,6 @@
 		</form>
 	</div>
 
-	<div>
-		<p>Add Product:</p>
-		<form>
-			Name: <input type="text" name="name"/><br/>
-			Product Number: <input type="text" name="number"/><br/>
-			<input type="hidden" name="operation" value="insertProduct"/>
-			<input type="submit" name="submit" value="submit"/>
-		</form>
-	</div>
 	<%
 		List producers = producerDAO.getAllProducers();
 		if ( producers.size() > 0 ) {

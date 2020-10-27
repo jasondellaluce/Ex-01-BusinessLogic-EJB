@@ -31,7 +31,10 @@ public class EJB3ProductDAO implements ProductDAO {
 //    @Interceptors(OperationLogger.class)
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int insertProduct(Product product) {
-
+        if (product.getProducer() != null) {
+            Producer managedProducer = em.merge(product.getProducer());
+            product.setProducer(managedProducer);
+        }
         em.persist(product);
         return product.getId();
     }
@@ -76,7 +79,7 @@ public class EJB3ProductDAO implements ProductDAO {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Product findProductByNumber(int productNumber) {
-        return (Product) em.createQuery("from Product p where p.productNumber = :num").
+        return (Product) em.createQuery("from Product p JOIN FETCH p.producer where p.productNumber = :num").
                 setParameter("num", productNumber).getSingleResult();
     }
 
@@ -89,7 +92,7 @@ public class EJB3ProductDAO implements ProductDAO {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public List<Product> getAllProducts() {
-        return em.createQuery("from Product").getResultList();
+        return em.createQuery("from Product p JOIN FETCH p.producer").getResultList();
     }
 
     @Override
@@ -97,7 +100,7 @@ public class EJB3ProductDAO implements ProductDAO {
     public List<Product> getAllProductsByProducer(Producer producer) {
         //Non è stato necessario usare una fetch join (nonostante Product.producer fosse mappato LAZY)
         //perché gli id delle entità LAZY collegate vengono comunque mantenuti e sono accessibili
-        return em.createQuery("FROM Product p WHERE :producerId = p.producer.id").
+        return em.createQuery("FROM Product p JOIN FETCH p.producer WHERE :producerId = p.producer.id").
                 setParameter("producerId", producer.getId()).getResultList();
     }
 
@@ -105,7 +108,7 @@ public class EJB3ProductDAO implements ProductDAO {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public List<Product> getAllProductsByPurchase(Purchase purchase) {
         // riattacco il product al contesto di persistenza con una merge
-        return em.createQuery("FROM Product p WHERE :purchaseId = p.purchase.id").
+        return em.createQuery("FROM Product p JOIN FETCH p.producer WHERE :purchaseId = p.purchase.id").
                 setParameter("purchaseId", purchase.getId()).getResultList();
     }
 }

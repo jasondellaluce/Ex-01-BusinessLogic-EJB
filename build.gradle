@@ -154,7 +154,6 @@ task prepareWar(){
 }
 
 war {
-    dependsOn('prepareWar')
 
     from 'src/webapp' // adds a file-set to the root of the archive
     //from 'tmp/war'
@@ -170,7 +169,6 @@ task prepareEar(){
 //    dependsOn('clean')
 //    dependsOn('build')
 //    dependsOn('prepareWar')
-    dependsOn('war')
 
     doLast {
         println("Preparing EAR file...")
@@ -218,7 +216,6 @@ task prepareEar(){
 }
 
 ear {
-    dependsOn('prepareEar')
 
 //     The Ear plugin adds two dependency configurations: deploy and earlib.
 //     All dependencies in the deploy configuration are placed in the root of the EAR archive, and are not transitive.
@@ -256,7 +253,6 @@ ear {
 task deployEar(){
     println("running dependencies.....")
     dependsOn("ear")
-    mustRunAfter("ear")
 
     println("dependencies resolved.....")
 
